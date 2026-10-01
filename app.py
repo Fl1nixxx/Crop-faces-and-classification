@@ -206,7 +206,6 @@ elif mode == "Клик по лицу":
         st.session_state["results"] = []
         st.session_state["last_click"] = None
         st.session_state["click_reset"] += 1
-        st.rerun()
 
 results = st.session_state["results"]
 
@@ -235,6 +234,9 @@ if results:
             with cols[i % 3]:
                 if mode != "Вручную":
                     st.image(result["image"],width=min(300, result["image"].width))
+                    
+                if mode == "Вручную":
+                    st.markdown(f"### Лицо №{i + 1}")
                     
                 st.markdown(f"### {result['age']}")
                 st.write("Race:", result["race"])
