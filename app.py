@@ -3,8 +3,8 @@ from PIL import Image
 import streamlit as st
 from streamlit_cropper import st_cropper
 from src.model import load_model
-from src.face_crop import (create_detector,mtcnn_crop)
-
+from src.face_crop import (create_detector,mtcnn_crop,click_crop,find_face_in_click_crop)
+from streamlit_image_coordinates import streamlit_image_coordinates
 from src.inference import (classify_faces,filter_results,AGE_LABELS,RACE_LABELS,GENDER_LABELS)
 
 st.set_page_config(page_title="Face Filter",page_icon="🧠",layout="wide")
@@ -66,8 +66,9 @@ if (st.session_state["current_image"]!= image_hash):
 image = Image.open(uploaded).convert("RGB")
 st.write(f"Размер исходника: "f"{image.width} × "f"{image.height}")
 
-mode = st.radio("Способ выделения лиц",["MTCNN","Вручную"],horizontal=True)
+mode = st.radio("Способ выделения лиц",["MTCNN","Вручную","Клик по лицу"],horizontal=True)
 
+#Первый режим
 if mode == "MTCNN":
     st.subheader("Автоматический поиск")
 
@@ -106,7 +107,8 @@ if mode == "MTCNN":
         if st.button("Распознать все лица",type="primary"):
             st.session_state["results"] = classify_faces(faces,model,device)
 
-else:
+#Второй режим 
+elif mode == "Вручную":
     st.subheader("Ручное выделение")
   
     crop = st_cropper(image,realtime_update=True,box_color="#ff0000",aspect_ratio=None, key=f"cropper_{image_hash}")
@@ -190,3 +192,22 @@ if results:
 
                 if (result.get( "confidence")is not None):
                     st.caption("MTCNN: "f"{result['confidence']:.3f}")
+                    
+#Третий режим
+elif mode == "Клик по лицу":
+    st.subheader("Кликните по лицу")
+    
+    coordinates = streamlit_image_coordinates(image,key=f"click_{image_hash}")
+
+    if coordinates is not None:
+        x = coordinates["x"]
+        y = coordinates["y"]
+
+        region = click_crop(image=image,x=x,y=y,size=400)
+        face = find_face_in_click_crop(region,detector,confidence_threshold=0.90)
+
+        if face is None:
+            st.warning("В выбранной области ""лицо не найдено.")
+        else:
+            results = classify_faces([face],model,device)
+            st.session_state["results"] = results
