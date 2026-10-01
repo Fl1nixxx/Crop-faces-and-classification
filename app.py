@@ -186,7 +186,7 @@ if results:
                 st.markdown(f"### "f"{result['age']}")
                 st.write("Race:",result["race"])
                 st.write("Gender:",result["gender"])
-                st.caption(result["source")
+                st.caption(result["source"])
 
                 if (result.get( "confidence")is not None):
                     st.caption("MTCNN: "f"{result['confidence']:.3f}")
