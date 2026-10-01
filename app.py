@@ -176,6 +176,12 @@ elif mode == "Клик по лицу":
     else:
         display_image = image.copy()
 
+    if st.button("Очистить"):
+        st.session_state["clicked_faces"] = []
+        st.session_state["results"] = []
+        st.session_state["last_click"] = None
+        st.session_state["click_reset"] += 1
+
     coordinates = streamlit_image_coordinates(display_image,width=display_image.width,key=f"click_{image_hash}_{st.session_state['click_reset']}")
     
     if coordinates is not None:
@@ -200,12 +206,6 @@ elif mode == "Клик по лицу":
                 st.session_state["results"].extend(new_result)
 
     st.write(f"Распознано лиц: {len(st.session_state['clicked_faces'])}")
-
-    if st.button("Очистить"):
-        st.session_state["clicked_faces"] = []
-        st.session_state["results"] = []
-        st.session_state["last_click"] = None
-        st.session_state["click_reset"] += 1
 
 results = st.session_state["results"]
 
