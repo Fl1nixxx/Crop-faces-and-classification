@@ -182,6 +182,8 @@ elif mode == "Клик по лицу":
                 with st.spinner("Распознаю лицо..."):
                     st.session_state["results"] = classify_faces([face],model,device)
 
+results = st.session_state["results"]
+
 if results:
     filtered = filter_results(results=results, age_filter=age_filter,race_filter=race_filter,gender_filter=gender_filter)
   
