@@ -154,8 +154,33 @@ elif mode == "Вручную":
 
         if st.button("Распознать все выбранные",type="primary"):
             st.session_state["results"] = classify_faces(faces,model,device)
+            
+#Третий режим
+elif mode == "Клик по лицу":
+    st.subheader("Кликните по лицу")
+    st.write("Нажмите примерно на центр лица")
 
-results = st.session_state["results"]
+    coordinates = streamlit_image_coordinates(image,key=f"click_{image_hash}")
+    if coordinates is not None:
+
+        x = int(coordinates["x"])
+        y = int(coordinates["y"])
+
+        current_click = (x, y)
+
+        if current_click != st.session_state["last_click"]:
+            st.session_state["last_click"] = current_click
+
+            region = click_crop(image=image,x=x,y=y,size=400)
+            with st.spinner("Проверяю область..."):
+                face = find_face_in_click_crop(region,detector,confidence_threshold=0.975)
+
+            if face is None:
+                st.session_state["results"] = []
+                st.warning("В выбранной области лицо не найдено.")
+            else:
+                with st.spinner("Распознаю лицо..."):
+                    st.session_state["results"] = classify_faces([face],model,device)
 
 if results:
     filtered = filter_results(results=results, age_filter=age_filter,race_filter=race_filter,gender_filter=gender_filter)
@@ -192,22 +217,3 @@ if results:
 
                 if (result.get( "confidence")is not None):
                     st.caption("MTCNN: "f"{result['confidence']:.3f}")
-                    
-#Третий режим
-elif mode == "Клик по лицу":
-    st.subheader("Кликните по лицу")
-    
-    coordinates = streamlit_image_coordinates(image,key=f"click_{image_hash}")
-
-    if coordinates is not None:
-        x = coordinates["x"]
-        y = coordinates["y"]
-
-        region = click_crop(image=image,x=x,y=y,size=400)
-        face = find_face_in_click_crop(region,detector,confidence_threshold=0.90)
-
-        if face is None:
-            st.warning("В выбранной области ""лицо не найдено.")
-        else:
-            results = classify_faces([face],model,device)
-            st.session_state["results"] = results
