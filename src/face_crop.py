@@ -73,7 +73,11 @@ def click_crop(image,x,y,size=400):
 def find_face_in_click_crop(crop,detector,confidence_threshold=0.90):
 
     crop_np = np.asarray(crop.convert("RGB"))
-    detections = detector.detect_faces(crop_np)
+    
+    try:
+        detections = detector.detect_faces(crop_np)
+    except ValueError:
+        return None
 
     if not detections:
         return None
