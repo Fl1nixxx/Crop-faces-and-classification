@@ -1,5 +1,6 @@
 streamlit
 streamlit-cropper
+streamlit-image-coordinates
 torch
 torchvision
 Pillow
