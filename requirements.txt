@@ -1,0 +1,7 @@
+streamlit
+streamlit-cropper
+torch
+torchvision
+Pillow
+numpy
+mtcnn[tensorflow]
