@@ -26,12 +26,14 @@ if "manual_faces" not in st.session_state:
 if "mtcnn_faces" not in st.session_state:
     st.session_state["mtcnn_faces"] = []
 
-
 if "results" not in st.session_state:
     st.session_state["results"] = []
 
 if "current_image" not in st.session_state:
     st.session_state["current_image"] = None
+
+if "last_click" not in st.session_state:
+    st.session_state["last_click"] = None
 
 st.title("Face Crop + Classification")
 
@@ -61,6 +63,7 @@ if (st.session_state["current_image"]!= image_hash):
     st.session_state["manual_faces"] = []
     st.session_state["mtcnn_faces"] = []
     st.session_state["results"] = []
+    st.session_state["last_click"] = None
 
 
 image = Image.open(uploaded).convert("RGB")
