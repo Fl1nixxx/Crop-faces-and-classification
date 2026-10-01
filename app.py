@@ -1,5 +1,7 @@
 import hashlib
 from PIL import Image
+from pathlib import Path
+import urllib.request
 import streamlit as st
 from streamlit_cropper import st_cropper
 from src.model import load_model
@@ -9,9 +11,19 @@ from src.inference import (classify_faces,filter_results,AGE_LABELS,RACE_LABELS,
 
 st.set_page_config(page_title="Face Filter",page_icon="🧠",layout="wide")
 
+WEIGHTS_PATH = Path("filternet_weights.pth")
+WEIGHTS_URL = ("https://github.com/Fl1nixxx/Crop-faces-and-classification/releases/download/v1/filternet_weights.pth")
+
+def download_weights():
+    if WEIGHTS_PATH.exists():
+        return
+    with st.spinner("Скачиваю веса модели..."):
+        urllib.request.urlretrieve(WEIGHTS_URL,WEIGHTS_PATH)
+
 @st.cache_resource
 def get_model():
-    return load_model("filternet_weights.pth")
+    download_weights()
+    return load_model(WEIGHTS_PATH)
 
 @st.cache_resource
 def get_detector():
