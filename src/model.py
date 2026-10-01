@@ -65,16 +65,34 @@ class FilterNet(nn.Module):
 
         return age_logits, race_logits, gender_logits
 
-def load_model(weights_path, device=None):
+def load_model(weights_path,device=None):
+
+    weights_path = Path(weights_path)
+
+    if not weights_path.exists():
+        raise FileNotFoundError(f"Weights not found: {weights_path}")
+
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = FilterNet()
+    model = FilterNet(9,7,1)
+    state_dict = torch.load(weights_path,map_location="cpu")
 
-    state_dict = torch.load(weights_path,map_location=device)
+    if isinstance(state_dict,dict):
+
+        if "model_state_dict" in state_dict:
+            state_dict = state_dict["model_state_dict"]
+
+        elif "state_dict" in state_dict:state_dict = state_dict["state_dict"]
+
+    if all(
+        key.startswith("module.") for key in state_dict.keys()):
+
+        state_dict = {key.replace("module.","",1): value for key, value in state_dict.items()}
+
     model.load_state_dict(state_dict)
 
     model = model.to(device)
     model.eval()
 
-    return model
+    return model, device
