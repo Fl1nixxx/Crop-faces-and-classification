@@ -1,7 +1,4 @@
 import hashlib
-import io
-import base64
-import streamlit.components.v1 as components
 from PIL import Image
 from pathlib import Path
 import urllib.request
@@ -11,82 +8,7 @@ from src.model import load_model
 from src.face_crop import (create_detector,mtcnn_crop,click_crop,find_face_in_click_crop)
 from streamlit_image_coordinates import streamlit_image_coordinates
 from src.inference import (classify_faces,filter_results,AGE_LABELS,RACE_LABELS,GENDER_LABELS)
-
-def image_actions(image, filename, key):
-    
-    buffer = io.BytesIO()
-    image.save(buffer,format="PNG")
-    image_bytes = buffer.getvalue()
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.download_button(label="Скачать",data=image_bytes,file_name=filename,mime="image/png",key=f"download_{key}",width="stretch")
-    with col2:
-        encoded = base64.b64encode(image_bytes).decode()
-
-        html = f"""
-        <button
-            id="copy_{key}"
-            style="
-                width: 100%;
-                height: 38px;
-                border-radius: 8px;
-                border: 1px solid #555;
-                cursor: pointer;
-            "
-        >
-            Копировать
-        </button>
-
-        <script>
-
-        const button =
-            document.getElementById(
-                "copy_{key}"
-            );
-
-        button.onclick = async () => {{
-
-            try {{
-
-                const response = await fetch(
-                    "data:image/png;base64,{encoded}"
-                );
-
-                const blob =
-                    await response.blob();
-
-
-                await navigator.clipboard.write([
-                    new ClipboardItem({{
-                        "image/png": blob
-                    }})
-                ]);
-
-
-                button.innerText =
-                    "Скопировано ✓";
-
-
-                setTimeout(() => {{
-                    button.innerText =
-                        "Копировать";
-                }}, 1500);
-
-
-            }} catch (error) {{
-
-                button.innerText =
-                    "Не удалось";
-
-                console.error(error);
-            }}
-
-        }};
-
-        </script>
-        """
-        components.html(html,height=45)
+from src.ui import image_actions
 
 st.set_page_config(page_title="Face Filter",page_icon="🧠",layout="wide")
 
