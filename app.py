@@ -35,6 +35,9 @@ if "current_image" not in st.session_state:
 if "last_click" not in st.session_state:
     st.session_state["last_click"] = None
 
+if "click_reset" not in st.session_state:
+    st.session_state["click_reset"] = 0
+
 if "clicked_faces" not in st.session_state:
     st.session_state["clicked_faces"] = []
 
@@ -173,7 +176,7 @@ elif mode == "Клик по лицу":
     else:
         display_image = image.copy()
 
-    coordinates = streamlit_image_coordinates(display_image,width=display_image.width,key=f"click_{image_hash}")
+    coordinates = streamlit_image_coordinates(display_image,width=display_image.width,key=f"click_{image_hash}_{st.session_state['click_reset']}")
     
     if coordinates is not None:
         scale_x = image.width / display_image.width
@@ -202,7 +205,7 @@ elif mode == "Клик по лицу":
         st.session_state["clicked_faces"] = []
         st.session_state["results"] = []
         st.session_state["last_click"] = None
-
+        st.session_state["click_reset"] += 1
         st.rerun()
 
 results = st.session_state["results"]
@@ -211,18 +214,15 @@ if results:
     filtered = filter_results(results=results, age_filter=age_filter,race_filter=race_filter,gender_filter=gender_filter)
   
     st.divider()
-
+    
     col1, col2 = st.columns(2)
-  
     col1.metric("Всего",len(results))
     col2.metric("Подошло под фильтр",len(filtered))
-
 
     if show_only_filtered:
         results_to_show = (filtered)
     else:
         results_to_show = (results)
-
 
     if not results_to_show:
         st.warning("Ни одно лицо ""не подходит под фильтр.")
@@ -233,12 +233,13 @@ if results:
 
         for i, result in enumerate(results_to_show):
             with cols[i % 3]:
-              
-                st.image(result["image"],width=min( 300,result["image"].width))
-                st.markdown(f"### "f"{result['age']}")
-                st.write("Race:",result["race"])
-                st.write("Gender:",result["gender"])
+                if mode != "Вручную":
+                    st.image(result["image"],width=min(300, result["image"].width))
+                    
+                st.markdown(f"### {result['age']}")
+                st.write("Race:", result["race"])
+                st.write("Gender:", result["gender"])
                 st.caption(result["source"])
 
-                if (result.get( "confidence")is not None):
-                    st.caption("MTCNN: "f"{result['confidence']:.3f}")
+                if result.get("confidence") is not None:
+                    st.caption(f"MTCNN: {result['confidence']:.3f}")
