@@ -35,6 +35,9 @@ if "current_image" not in st.session_state:
 if "last_click" not in st.session_state:
     st.session_state["last_click"] = None
 
+if "clicked_faces" not in st.session_state:
+    st.session_state["clicked_faces"] = []
+
 st.title("Face Crop + Classification")
 
 with st.sidebar:
@@ -160,41 +163,47 @@ elif mode == "Вручную":
             
 #Третий режим
 elif mode == "Клик по лицу":
-
-    st.subheader("Кликните по лицу")
+    st.subheader("Кликните по лицам")
 
     max_width = 800
-    
+
     if image.width > max_width:
         scale = max_width / image.width
-        display_image = image.resize((max_width,int(image.height * scale)))
+        display_image = image.resize((max_width, int(image.height * scale)))
     else:
         display_image = image.copy()
 
     coordinates = streamlit_image_coordinates(display_image,width=display_image.width,key=f"click_{image_hash}")
-
+    
     if coordinates is not None:
         scale_x = image.width / display_image.width
         scale_y = image.height / display_image.height
 
         x = int(coordinates["x"] * scale_x)
         y = int(coordinates["y"] * scale_y)
+
         current_click = (x, y)
 
-        if (current_click!= st.session_state["last_click"]):
+        if current_click != st.session_state["last_click"]:
             st.session_state["last_click"] = current_click
-
             region = click_crop(image=image,x=x,y=y,size=400)
 
-            with st.spinner("Ищу лицо..."):
-                face = find_face_in_click_crop(region,detector,confidence_threshold=0.90)
-                
+            with st.spinner("Ищу лицо..."):face = find_face_in_click_crop(region,detector,confidence_threshold=0.975)
             if face is None:
-                st.session_state["results"] = []
                 st.warning("В выбранной области лицо не найдено.")
             else:
-                with st.spinner("Распознаю..."):
-                    st.session_state["results"] = classify_faces([face],model,device)
+                st.session_state["clicked_faces"].append(face)
+                with st.spinner("Распознаю..."):new_result = classify_faces([face],model,device)
+                st.session_state["results"].extend(new_result)
+
+    st.write(f"Распознано лиц: {len(st.session_state['clicked_faces'])}")
+
+    if st.button("Очистить"):
+        st.session_state["clicked_faces"] = []
+        st.session_state["results"] = []
+        st.session_state["last_click"] = None
+
+        st.rerun()
 
 results = st.session_state["results"]
 
