@@ -118,7 +118,7 @@ else:
     col1, col2, col3 = st.columns(3)
     with col1:
         if st.button("Добавить лицо",use_container_width=True):
-            if (crop.width >= 20and crop.height >= 20):
+            if (crop.width >= 20 and crop.height >= 20):
 
                 st.session_state["manual_faces"].append({"image":crop.copy(), "source": "Manual","confidence":None})
                 st.session_state["results"] = []
@@ -128,7 +128,7 @@ else:
         if st.button("Удалить последнее",use_container_width=True):
             if st.session_state["manual_faces"]:
                 st.session_state["manual_faces"].pop()
-                st.session_state[ "results" = []
+                st.session_state["results"] = []
 
     with col3:
 
