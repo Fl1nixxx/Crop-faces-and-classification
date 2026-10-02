@@ -19,7 +19,7 @@
 Crop-faces-and-classification/
 ├── app.py
 ├── requirements.txt
-├── runtime.txt
+├── run_app.txt
 │
 └── src/
     ├── __init__.py
@@ -27,3 +27,10 @@ Crop-faces-and-classification/
     ├── inference.py
     ├── face_crop.py
     └── ui.py
+```
+## Запуск
+
+Для зпуска приложения нужно скачать файл run_app.ipynb и запустить его в google collab  
+Выполнить весь код и перейти по ссылке   
+>[!WARNING]
+>Для этого может потребоваться VPN
